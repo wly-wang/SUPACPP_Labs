@@ -1,34 +1,40 @@
-CC=g++ #Name of compiler
-FLAGS=-std=c++20 -w #Compiler flags (the s makes it silent)
-TARGET=TestFiniteFunctions #Executable name
-OBJECTS=TestFiniteFunctions.o FiniteFunctions.o #CustomFunctions.o
-LIBS=-I ../../GNUplot/ -lboost_iostreams
+# Compiler and flags
+CC     = g++
+FLAGS  = -std=c++20 -w
+LIBS   = -I ../../GNUplot/ -lboost_iostreams
 
-#First target in Makefile is default
-${TARGET}:${OBJECTS} #Make target from objects
-	@echo "Linking..."
-	${CC} ${FLAGS} ${OBJECTS} ${LIBS} -o ${TARGET}
-	@make clean
+# Default: build BOTH executables
+all: TestFiniteFunctions CustomFunctions
 
-TestFiniteFunctions.o : TestFiniteFunctions.cxx FiniteFunctions.h
-	${CC} ${FLAGS} ${LIBS} -c TestFiniteFunctions.cxx
+# --------------------------------------------------------
+# Build TestFiniteFunctions executable
+# --------------------------------------------------------
+TestFiniteFunctions: TestFiniteFunctions.o FiniteFunctions.o
+	$(CC) $(FLAGS) TestFiniteFunctions.o FiniteFunctions.o $(LIBS) -o TestFiniteFunctions
 
-FiniteFunctions.o : FiniteFunctions.cxx FiniteFunctions.h
-	${CC} ${FLAGS} ${LIBS} -c FiniteFunctions.cxx
+TestFiniteFunctions.o: TestFiniteFunctions.cxx FiniteFunctions.h
+	$(CC) $(FLAGS) $(LIBS) -c TestFiniteFunctions.cxx
 
-#CustomFunctions.o : CustomFunctions.cxx
-#	${CC} ${FLAGS} ${LIBS} -c CustomFunctions.cxx
-	
-#CalculatePi.o : CalculatePi.cxx
-#	${CC} ${FLAGS} ${LIBS} -c CalculatePi.cxx
+# --------------------------------------------------------
+# Build CustomFunctions executable (your new main)
+# --------------------------------------------------------
+CustomFunctions: CustomFunctions.o FiniteFunctions.o
+	$(CC) $(FLAGS) CustomFunctions.o FiniteFunctions.o $(LIBS) -o CustomFunctions
 
-#CalculatePi : CalculatePi.o
-#	@echo "Linking for CalculatePi..."
-#	${CC} ${FLAGS} CalculatePi.o -o CalculatePi
-#	@make clean
-	
-clean: #No targets just run shell command to rm object files and emacs backups
-	@rm -f *.o *~
+CustomFunctions.o: CustomFunctions.cxx CustomFunctions.h FiniteFunctions.h
+	$(CC) $(FLAGS) $(LIBS) -c CustomFunctions.cxx
 
-cleantarget: #Delete the exectuable
-	@rm -f ${TARGET}
+# --------------------------------------------------------
+# Base class object file
+# --------------------------------------------------------
+FiniteFunctions.o: FiniteFunctions.cxx FiniteFunctions.h
+	$(CC) $(FLAGS) $(LIBS) -c FiniteFunctions.cxx
+
+# --------------------------------------------------------
+# Cleaning rules
+# --------------------------------------------------------
+clean:
+	rm -f *.o *~
+
+cleantarget:
+	rm -f TestFiniteFunctions CustomFunctions

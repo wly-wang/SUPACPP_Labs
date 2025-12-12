@@ -61,10 +61,25 @@ double FiniteFunction::callFunction(double x) {return this->invxsquared(x);}; //
 Integration by hand (output needed to normalise function when plotting)
 ###################
 */ 
+
 double FiniteFunction::integrate(int Ndiv){ //private
-  //ToDo write an integrator
-  return -99;  
+  // Simple trapezoidal integration of callFunction(x) from m_RMin to m_RMax
+  double h = (m_RMax - m_RMin) / static_cast<double>(Ndiv);
+  double sum = 0.0;
+
+  // endpoints (with 1/2 weight)
+  sum += 0.5 * callFunction(m_RMin);
+  sum += 0.5 * callFunction(m_RMax);
+
+  // interior points
+  for (int i = 1; i < Ndiv; ++i) {
+    double x = m_RMin + i * h;
+    sum += callFunction(x);
+  }
+
+  return sum * h;
 }
+
 double FiniteFunction::integral(int Ndiv) { //public
   if (Ndiv <= 0){
     std::cout << "Invalid number of divisions for integral, setting Ndiv to 1000" <<std::endl;
@@ -196,8 +211,7 @@ void FiniteFunction::generatePlot(Gnuplot &gp){
     gp << "set style line 1 lt 1 lw 2 pi 1 ps 0\n";
     gp << "plot '-' with linespoints ls 1 title '"<<m_FunctionName<<"', '-' with points ps 1 lc rgb 'black' pt 7 title 'data'\n";
     gp.send1d(m_function_scan);
-    gp.send1d(m_data);
-  }
+    gp.send1d(m_data); }
   else if (m_plotfunction==true && m_plotsamplepoints==true){
     gp << "set terminal pngcairo\n";
     gp << "set output 'Outputs/png/"<<m_FunctionName<<".png'\n"; 
